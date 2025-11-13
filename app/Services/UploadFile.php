@@ -1,9 +1,6 @@
 <?php
 
 namespace App\Services;
-
-use App\Services\ResponseApi;
-
 class UploadFile {
 
     public function upload_img($file,$path){
