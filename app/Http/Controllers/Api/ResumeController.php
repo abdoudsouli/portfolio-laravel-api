@@ -157,4 +157,41 @@ class ResumeController extends Controller
     return ResponseApi::error('Error : '.$e->getMessage(),401);
     }
     }
+
+    public function resumedeletedrestore(Request $request){
+        try {
+        $validator = Validator::make(
+         $request->all(),
+         [
+            'id_resume'=>'required|integer'
+         ],
+         [
+           'id_resume.required'=>'The id resume field is required.',
+            'id_resume.integer'=>'The id resume field must be an integer.!',
+         ]
+        );
+
+        if($validator->fails()){
+            return ResponseApi::error($validator->errors(),401);
+        }
+
+        $findresume = Resume::onlyTrashed()->find($request->id_resume);
+        if($findresume){
+        $findresume->restore();
+        return ResponseApi::success('Resume Restored successfully');
+        }
+        return ResponseApi::error('Cant find resume!',404);
+        } catch (\Exception $e) {
+        return ResponseApi::error('Error: '.$e->getMessage(),500);
+        }
+    }
+
+    public function resumedeleted(Request $request){
+        try {
+        $getRemovedResume = Resume::onlyTrashed()->get();
+        return ResponseApi::data(null,'resume',$getRemovedResume);
+        } catch (\Exception $e) {
+        return ResponseApi::error('Error: '.$e->getMessage(),500);
+        }
+    }
 }

@@ -23,8 +23,8 @@ Route::apiResource('skills',SkillsController::class);
 Route::apiResource('project',ProjectController::class);
 Route::apiResource('resume',ResumeController::class);
 
-Route::post('resumedeletedrestore',ResumeController::class,'resumedeletedrestore');
-Route::post('resumedeleted',ResumeController::class,'resumedeleted');
+Route::post('resumedeletedrestore',[ResumeController::class,'resumedeletedrestore']);
+Route::get('resumedeleted',[ResumeController::class,'resumedeleted']);
 
 Route::get('projectdeleted',[ProjectController::class,'projectdeleted']);
 Route::post('projectdeletedrestore',[ProjectController::class,'projectdeletedrestore']);
