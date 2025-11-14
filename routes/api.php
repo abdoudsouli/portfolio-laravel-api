@@ -16,8 +16,9 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum','role:admin','checkpassword'])->group(function(){
 Route::post('/logout', [AuthController::class, 'logout']);
-Route::get('/user',[UserController::class,'index']);
-Route::get('/user/{id}',[UserController::class,'getbyid']);
+Route::get('/profil',[UserController::class,'index']);
+Route::post('/profil/update',[UserController::class,'update_profil']);
+Route::post('/profil/changepassword',[UserController::class,'change_password']);
 Route::apiResource('services',ServicesController::class);
 Route::apiResource('skills',SkillsController::class);
 Route::apiResource('project',ProjectController::class);
