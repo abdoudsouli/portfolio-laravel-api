@@ -4,69 +4,108 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Services\ResponseApi;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-   public function index(){
-     return User::get();
+   public function index(Request $request){
+        try {
+
+        $user=$request->user();
+        $profil = User::select('id','name','date_birth','address','phone','about_me','email','role')->where('id',$user->id)->first();
+
+        return ResponseApi::data(null,'profil',$profil);
+        } catch (\Exception $e) {
+        return ResponseApi::error('Error :'.$e->getMessage(),500);
+        }
    }
 
-   public function getbyid(Request $request , $id){
 
-    $request->merge(['id'=>$id]);
+   public function change_password(Request $request){
+       try {
+        $user = $request->user();
+
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'old_password'=>'required|min:6|max:25',
+                'new_password'=>'required|min:6|confirmed'
+            ]
+        );
+
+        if($validator->fails()){
+           return ResponseApi::error($validator->errors(),401);
+        }
+
+        $get_user = User::where('id',$user->id)->first();
+        $old_password_check = Hash::check($request->old_password, $get_user->password);
+
+        if(!$old_password_check){
+            return ResponseApi::error('Current password is incorrect',401);
+        }
+
+        $get_user->update([
+            'password'=>Hash::make($request->new_password)
+         ]);
+
+         return ResponseApi::success('Password successfully updated');
+
+       } catch (\Exception $e) {
+        return ResponseApi::error('Error :'.$e->getMessage(),500);
+       }
+   }
+
+   public function update_profil(Request $request){
+    try {
+
+    $user = $request->user();
 
     $validator = Validator::make(
      $request->all(),
      [
-        //digits_between أرقام between min and max
-        //min:4|max:8' for alidate character length (string), use min and max instead.
-
-        'id'=>'required|numeric|digits_between:1,225'
-     ],
-     [
-        'id.required' => 'uesr not fond!! code:285',
-        'id.numeric' =>'uesr not fond!! code:254',
-        'id.max' =>'uesr not fond!! code:542',
-     ]
+        'name'=>'required|max:225',
+        'date_birth'=>'required|date_format:Y-m-d',
+        'address'=>'required|max:225',
+        'phone'=>
+        [
+            'required',
+            'regex:/^\+[0-9]{1,4}[0-9]{8,10}$/',
+        ],
+        'about_me'=>'nullable|max:225'
+    ],
+    [
+        'phone.regex'=>'Phone Fromat is incorecct ex: +1xxxxxxx'
+    ]
     );
 
-
-    // if have a errors
     if($validator->fails()){
-        return response()->json(
-            //errors message
-            [
-           'seccess'=>false,
-            'errors'=>$validator->errors()
-        ]
-        ,
-        422//code error
-    );
+        return ResponseApi::error($validator->errors(),401);
     }
 
-
-    $data = User::where('id',$request->id)->get();
-
-    if($data->isEmpty()){
-        return response()->json(
-        //errors message
-        [
-        'seccess'=>false,
-        'errors'=>'no user fond data is empty!'
-        ]
-        ,
-        422//code error
-    );
+    $update_profil = User::where('id',$user->id)->first();
+    if (!$update_profil) {
+     return ResponseApi::error('User not found',404);
     }
 
-    return response()->json(
+    $update_profil->update(
         [
-            'success'=>true,
-            'data'=>$data
+          'name'=>strtoupper($request->name),
+          'date_birth'=>$request->date_birth,
+          'address'=>$request->address,
+          'phone'=>$request->phone,
+          'about_me'=>$request->about_me
         ]
         );
 
+
+    return ResponseApi::success('profil info updated successfully');
+
+    } catch (\Exception $e) {
+     return ResponseApi::error('Error :'.$e->getMessage(),500);
+    }
    }
+
 }
