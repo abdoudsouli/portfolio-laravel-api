@@ -13,10 +13,15 @@ class ResponseApi{
     }
 
    static function error($msg,$code){
+        if(is_object($msg)){
+        $errors = collect($msg->toArray())->flatten()->values();
+        }else{
+        $errors = $msg;
+        }
         return response()->json(
             [
                 'success'=>false,
-                'errors'=>$msg
+                'errors'=>$errors
             ],$code
         );
     }
