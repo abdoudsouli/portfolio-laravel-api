@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Services\ResponseApi;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -84,24 +85,17 @@ $request->name = strtoupper($request->name);
         );
 
         if($validator->fails()){
-            return response()->json(
-                [
-                    'success'=>false,
-                    'errors'=>$validator->errors()
-                ]
-                ,
-                422
-                );
+            return ResponseApi::error($validator->errors(),401);
         };
 
         $user = User::where('email', $request->email)->first();
         $passwordtest = Hash::check($request->password, $user->password);
         if (!$user || !$passwordtest) {
-            return response()->json(
-                [
-                    'message' =>'Email address or password is incorrect!'
-                    ]
-                , 401);
+            return ResponseApi::error('Email address or password is incorrect!',401);
+        }
+
+        if(!$user->hasVerifiedEmail()){
+         return ResponseApi::error('Authentication failed please verify your email address',401);
         }
 
         // Delete old tokens if you want (optional)
@@ -110,34 +104,11 @@ $request->name = strtoupper($request->name);
         // Create new token
         $token = $user->createToken('api_token')->plainTextToken;
 
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-        ]);
+        return ResponseApi::data(null,'token',$token);
     }
 
-
     public function logout(Request $request){
-/*
-// حذف التوكن الحالي فقط
-هاد الكود كيعني:
-
-المستخدم لي دير login دابا، نحيد ليه فقط الـ token ديالو الحالي (يعني يخرج من هاد الجهاز فقط)
-
-$request->user()->currentAccessToken()->delete();
-
-return response()->json([
-'success' => true,
-'message' => 'Logged out successfully'
-]);
-*/
-
- $request->user()->tokens()->delete();
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Logged out from all devices'
-    ]);
-
+    $request->user()->tokens()->delete();
+    return ResponseApi::success('Logged out from all devices');
     }
 }
