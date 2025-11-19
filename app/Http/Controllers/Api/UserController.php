@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use App\Services\UploadFile;
 use Illuminate\Http\Request;
 use App\Services\ResponseApi;
 use App\Http\Controllers\Controller;
@@ -106,6 +107,41 @@ class UserController extends Controller
     } catch (\Exception $e) {
      return ResponseApi::error('Error :'.$e->getMessage(),500);
     }
+   }
+
+   public function avatar(Request $request){
+    try {
+
+    $user  = $request->user();
+    $uploadfile = new UploadFile;
+
+    $useravatar = User::find($user->id);
+
+    if (!$useravatar) {
+     return ResponseApi::error('User not Found',401);
+    }
+
+    $validator = Validator::make(
+    $request->all(),
+    [
+        'avatar'=>'required|image|mimes:jpeg,jpg,png|max:2048'
+    ]
+    );
+
+    if ($validator->fails()) {
+      return responseApi::error($validator->errors(),401);
+    }
+
+    $newnameavatar = $uploadfile->upload_img($request->avatar,'avatar');
+    $useravatar->update([
+     'avatar'=>$newnameavatar
+    ]);
+
+     return ResponseApi::success('Avatar uploaded successfully');
+    } catch (\Exception $e) {
+        return ResponseApi::error('Error : '.$e->getMessage(),500);
+    }
+
    }
 
 }
