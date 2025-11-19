@@ -8,7 +8,7 @@ class UploadFile {
 
          $new_name = time().'.'.$file->extension();
          $file->storeAs($path,$new_name,'public');
-         return $new_name;
+         return $path.'/'.$new_name;
 
      } catch (\Exception $e) {
        return false;
