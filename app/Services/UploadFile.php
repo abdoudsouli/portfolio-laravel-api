@@ -15,4 +15,16 @@ class UploadFile {
      }
     }
 
+    public function upload_file($file, $folder)
+        {
+           try {
+             $extension = $file->getClientOriginalExtension();
+            $filename = uniqid() . '_' . time() . '.' . $extension;
+            $file->storeAs('public/' . $folder, $filename);
+            return $filename;
+           } catch (\Exception $e) {
+              return false;
+           }
+        }
+
 }

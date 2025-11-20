@@ -20,7 +20,7 @@ Route::get('/profil',[UserController::class,'index']);
 Route::post('/profil/update',[UserController::class,'update_profil']);
 Route::post('/profil/changepassword',[UserController::class,'change_password']);
 Route::post('/profil/avatar',[UserController::class,'avatar']);
-
+Route::post('/profil/cv',[UserController::class,'uploadcv']);
 Route::apiResource('services',ServicesController::class);
 Route::apiResource('skills',SkillsController::class);
 Route::apiResource('project',ProjectController::class);
