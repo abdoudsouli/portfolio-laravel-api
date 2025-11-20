@@ -21,7 +21,7 @@ class UploadFile {
              $extension = $file->getClientOriginalExtension();
             $filename = uniqid() . '_' . time() . '.' . $extension;
             $file->storeAs('public/' . $folder, $filename);
-            return $filename;
+            return $folder.''.$filename;
            } catch (\Exception $e) {
               return false;
            }
