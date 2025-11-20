@@ -16,7 +16,7 @@ class UserController extends Controller
         try {
 
         $user=$request->user();
-        $profil = User::select('id','name','date_birth','address','phone','about_me','email','role','avatar')->where('id',$user->id)->first();
+        $profil = User::select('id','name','date_birth','address','phone','about_me','email','role','avatar','cvfile')->where('id',$user->id)->first();
         if ($profil->avatar !== null) {
             $profil->avatar = 'https://domain.com/img-profil/'.$profil->avatar;
         }
@@ -145,5 +145,42 @@ class UserController extends Controller
     }
 
    }
+
+  public function uploadcv(Request $request){
+    try {
+
+           $user = $request->user();
+           $uploadfile = new UploadFile;
+           $validator = Validator::make(
+            $request->all(),
+            [
+              'cv_file'=>[
+                'required',
+                'mimetypes:application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'max:5120']
+            ],
+            [
+                'cv_file.max'=>'The cv file field must not be greater than 5MB.',
+                'cv_file.mimetypes'=>'The cv file field must be a file of type: PDF or WORD.'
+            ]
+            );
+
+            if($validator->fails()){
+                return ResponseApi::error($validator->errors(),422);
+            }
+
+            $new_name = $uploadfile->upload_file($request->file('cv_file'),'cv');
+            if (!$new_name) {
+              return ResponseApi::error('uploaded file is incorrect');
+            }
+              $user->update([
+                'cvfile'=>$new_name
+                ]);
+            return ResponseApi::success('Your cv has ben uploaded successfully');
+
+    } catch (\Exception $e) {
+            return ResponseApi::error('Something went wrong, please try again later.',500);
+    }
+  }
 
 }
