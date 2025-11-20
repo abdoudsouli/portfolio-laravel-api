@@ -16,8 +16,10 @@ class UserController extends Controller
         try {
 
         $user=$request->user();
-        $profil = User::select('id','name','date_birth','address','phone','about_me','email','role')->where('id',$user->id)->first();
-
+        $profil = User::select('id','name','date_birth','address','phone','about_me','email','role','avatar')->where('id',$user->id)->first();
+        if ($profil->avatar !== null) {
+            $profil->avatar = 'https://domain.com/img-profil/'.$profil->avatar;
+        }
         return ResponseApi::data(null,'profil',$profil);
         } catch (\Exception $e) {
         return ResponseApi::error('Error :'.$e->getMessage(),500);
