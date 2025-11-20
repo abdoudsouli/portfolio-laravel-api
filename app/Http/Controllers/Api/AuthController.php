@@ -89,11 +89,14 @@ $request->name = strtoupper($request->name);
         };
 
         $user = User::where('email', $request->email)->first();
-        $passwordtest = Hash::check($request->password, $user->password);
-        if (!$user || !$passwordtest) {
+
+        if (!$user) {
             return ResponseApi::error('Email address or password is incorrect!',401);
         }
-
+         $passwordtest = Hash::check($request->password, $user->password);
+         if (!$passwordtest) {
+            return ResponseApi::error('Email address or password is incorrect!',401);
+        }
         if(!$user->hasVerifiedEmail()){
          return ResponseApi::error('Authentication failed please verify your email address',401);
         }
